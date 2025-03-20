@@ -3,6 +3,7 @@
 long indice[27] = { -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, -1, -1};//Tabla donde se guardan los indices
 
 void construirIndice(char *);
+int compTabla(char *);
 void imprimeIndice();
 void imprimeTabla(char *);
 int buscar(char*, char*);
@@ -21,9 +22,16 @@ int main(){
 }
 
 void construirIndice(char *narchivo){
+    int o = compTabla(narchivo);
+    printf("%d \n\n", o);
+    if(o){
+        puts("Tabla ya existente leida correctamente");
+        return;
+    }
     FILE *archivo = fopen(narchivo, "r");//Abrimos el archivo
-    if(!archivo){
-        puts("No se pudo abrir el archivo");//Mensaje de error
+    FILE *ctabla = fopen("TABLA.txt", "w");//Creamos el archivo del index
+    if(!archivo || !ctabla){
+        puts("No se pudo abrir el archivo de claves");//Mensaje de error
         return;
     }
     char linea[10];//Damos un arreglo para leer las claves
@@ -38,10 +46,51 @@ void construirIndice(char *narchivo){
         }
         posicion = ftell(archivo);//Actualiza la posicion del archivo
     }
+        // Escribir tabla de índices
     indice[26] = ftell(archivo);
+    for (int i = 0; i < 27; i++) {
+        fprintf(ctabla, "%c\n%ld\n", 'A' + i, indice[i]);
+    }
+    fclose(ctabla);
     fclose(archivo);
 
 }
+
+int compTabla(char *narchivo){
+    FILE *archivo = fopen(narchivo, "r");
+    if(!archivo){
+        puts("Error al abrir el archivo");
+        return 0;
+    }
+    // Obtener tamaño real del archivo
+    fseek(archivo, 0, SEEK_END);
+    long tamanoReal = ftell(archivo);
+    fclose(archivo);
+
+    FILE *tabla = fopen("TABLA.txt", "r");
+    char letraTabla;
+    long posTabla;
+    if(tabla){
+        while(fscanf(tabla, " %c %ld", &letraTabla, &posTabla) == 2){
+            printf("%c\t%ld\n", letraTabla, posTabla);
+            if(indice[letraTabla - 'A'] == -1)
+                indice[letraTabla - 'A'] = posTabla;
+        }
+    }else{
+        puts("No hay tabla de index, se generara una nueva");
+        return 0;
+    }
+    fclose(tabla);
+    posTabla = indice[26];
+    printf("%ld\t%ld\n", posTabla, tamanoReal);
+    if(tamanoReal == posTabla){
+        puts("La tabla es valida");
+        return 1;
+    }
+    puts("La tabla no es valida");
+    return 0;
+}
+
 //Los de impresion solo fueron para probar que si se genere la tabla
 void imprimeIndice(){
     int i;
