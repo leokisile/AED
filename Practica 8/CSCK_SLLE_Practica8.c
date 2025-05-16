@@ -30,7 +30,7 @@ int main(){
                 mete(exp[i],&p);
             else if(exp[i] == ')' || exp[i] == ']' || exp[i] == '}'){
                 if(!esBalanceada(exp[i],&p)){
-                    printf("La expresion no esta correctamente balanceada, error en el fragmento %s\n", fragmento(exp+i,temp));
+                    printf("La expresion no esta correctamente balanceada, error en el fragmento %s\n", fragmento(exp+i-1,temp));
                     validado = 1;
                     break;
                 }
